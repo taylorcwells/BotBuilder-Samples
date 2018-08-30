@@ -39,7 +39,7 @@
     "storage_account_type": {
       "defaultValue": "Standard_LRS",
       "type": "string"
-    }    
+    }
   },
   "variables": {
     "service_name": "[toLower(parameters('siteName'))]",
@@ -73,14 +73,11 @@
     "site_host": "[concat(variables('app_service_name'), '.azurewebsites.net')]",
     "bot_endpoint": "[concat('https://', variables('site_host'), '/api/messages')]",
     "app_service_sku": {
-      "type": "object",
-      "defaultValue": {
-        "name": "S1",
-        "tier": "Standard",
-        "size": "S1",
-        "family": "S",
-        "capacity": 1
-      }
+      "name": "S1",
+      "tier": "Standard",
+      "size": "S1",
+      "family": "S",
+      "capacity": 1
     }
   },
   "resources": [
