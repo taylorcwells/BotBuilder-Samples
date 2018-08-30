@@ -11,6 +11,17 @@
     },
     "microsoft_app_id": {
       "type": "string"
+    },
+    "app_insights_location": {
+      "type": "string",
+      "allowedValues": [
+        "eastus",
+        "westus2",
+        "southcentralus",
+        "northeurope",
+        "westeurope",
+        "southeastasia"
+      ]
     }
   },
   "variables": {
@@ -88,7 +99,7 @@
       "type": "microsoft.insights/components",
       "kind": "web",
       "apiVersion": "2014-04-01",
-      "location": "[parameters('siteLocation')]",
+      "location": "[parameters('app_insights_location')]",
       "tags": {
         "[concat('hidden-link:', resourceId('Microsoft.BotService/botServices/', variables('bot_id')))]": "Resource",
         "[concat('hidden-link:', resourceId('Microsoft.Web/sites/', variables('service_name')))]": "Resource"
