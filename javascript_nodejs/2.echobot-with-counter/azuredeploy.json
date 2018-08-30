@@ -3,41 +3,13 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "siteName": {
-      "defaultValue": "BotBuilder-Samples-2-nodejs",
+      "defaultValue": "BotBuilder-Samples",
       "type": "string"
     },
-    "service_location": {
-      "defaultValue": "westus",
-      "type": "string",
-      "allowedValues": [
-        "westus",
-        "eastus",
-        "westus2",
-        "southcentralus",
-        "northeurope",
-        "westeurope",
-        "southeastasia"
-      ]
-    },
-    "app_insights_location": {
-      "type": "string",
-      "allowedValues": [
-        "eastus",
-        "westus2",
-        "southcentralus",
-        "northeurope",
-        "westeurope",
-        "southeastasia"
-      ]
+    "siteLocation": {
+      "type": "string"
     },
     "microsoft_app_id": {
-      "type": "string"
-    },
-    "microsoft_app_password": {
-      "type": "string"
-    },
-    "storage_account_type": {
-      "defaultValue": "Standard_LRS",
       "type": "string"
     }
   },
@@ -63,7 +35,6 @@
         "openIdMetadata": ""
       }
     },
-    "storage_account_name": "[toLower(variables('service_name'))]",
     "cosmos_db_name": "[toLower(variables('service_name'))]",
     "app_service_name": "[variables('service_name')]",
     "app_insights_name": "[concat(variables('service_name'), '-insights')]",
@@ -82,30 +53,21 @@
   },
   "resources": [
     {
-      "type": "Microsoft.Storage/storageAccounts",
-      "name": "[variables('storage_account_name')]",
-      "apiVersion": "2015-05-01-preview",
-      "location": "[parameters('service_location')]",
-      "properties": {
-        "accountType": "[parameters('storage_account_type')]"
-      }
-    },
-    {
       "apiVersion": "2015-04-08",
       "type": "Microsoft.DocumentDB/databaseAccounts",
       "kind": "GlobalDocumentDB",
       "name": "[variables('cosmos_db_name')]",
-      "location": "[parameters('service_location')]",
+      "location": "[parameters('siteLocation')]",
       "properties": {
         "name": "[variables('cosmos_db_name')]",
         "databaseAccountOfferType": "Standard",
         "locations": [
           {
-            "locationName": "[parameters('service_location')]",
+            "locationName": "[parameters('siteLocation')]",
             "failoverPriority": 0
           },
           {
-            "locationName": "[parameters('service_location')]",
+            "locationName": "[parameters('siteLocation')]",
             "failoverPriority": 1
           }
         ]
@@ -115,7 +77,7 @@
       "type": "Microsoft.Web/serverfarms",
       "name": "[variables('app_service_name')]",
       "apiVersion": "2016-09-01",
-      "location": "[parameters('service_location')]",
+      "location": "[parameters('siteLocation')]",
       "sku": "[variables('app_service_sku')]",
       "properties": {
         "name": "[variables('app_service_name')]"
@@ -126,7 +88,7 @@
       "type": "microsoft.insights/components",
       "kind": "web",
       "apiVersion": "2014-04-01",
-      "location": "[parameters('app_insights_location')]",
+      "location": "[parameters('siteLocation')]",
       "tags": {
         "[concat('hidden-link:', resourceId('Microsoft.BotService/botServices/', variables('bot_id')))]": "Resource",
         "[concat('hidden-link:', resourceId('Microsoft.Web/sites/', variables('service_name')))]": "Resource"
@@ -139,24 +101,13 @@
       "name": "[variables('app_service_name')]",
       "type": "Microsoft.Web/sites",
       "apiVersion": "2015-08-01",
-      "location": "[parameters('service_location')]",
+      "location": "[parameters('siteLocation')]",
       "kind": "app",
-      "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts/', variables('storage_account_name'))]"
-      ],
       "properties": {
         "name": "[variables('service_name')]",
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('app_service_name'))]",
         "siteConfig": {
           "appSettings": [
-            {
-              "name": "AzureWebJobsStorage",
-              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storage_account_name'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storage_account_name')), '2015-05-01-preview').key1,';')]"
-            },
-            {
-              "name": "AzureWebJobsDashboard",
-              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storage_account_name'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storage_account_name')), '2015-05-01-preview').key1,';')]"
-            },
             {
               "name": "WEBSITE_NODE_DEFAULT_VERSION",
               "value": "6.9.1"
@@ -172,10 +123,6 @@
             {
               "name": "MicrosoftAppId",
               "value": "[parameters('microsoft_app_id')]"
-            },
-            {
-              "name": "MicrosoftAppPassword",
-              "value": "[parameters('microsoft_app_password')]"
             },
             {
               "name": "BotStateEndpoint",
@@ -229,17 +176,12 @@
         "developerAppInsightKey": "[reference(resourceId('microsoft.insights/components/', variables('app_insights_name')), '2015-05-01').InstrumentationKey]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts/', variables('storage_account_name'))]",
         "[resourceId('Microsoft.Web/sites/', variables('app_service_name'))]",
         "[resourceId('microsoft.insights/components/', variables('app_insights_name'))]"
       ]
     }
   ],
   "outputs": {
-    "storageResourceId": {
-      "type": "string",
-      "value": "[resourceId('Microsoft.Storage/storageAccounts', variables('storage_account_name'))]"
-    },
     "cosmosDbResourceId": {
       "type": "string",
       "value": "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmos_db_name'))]"
