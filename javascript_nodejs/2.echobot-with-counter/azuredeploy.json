@@ -7,8 +7,17 @@
       "type": "string"
     },
     "service_location": {
-      "defaultValue": "[resourceGroup().location]",
-      "type": "string"
+      "defaultValue": "westus",
+      "type": "string",
+      "allowedValues": [
+        "westus",
+        "eastus",
+        "westus2",
+        "southcentralus",
+        "northeurope",
+        "westeurope",
+        "southeastasia"
+      ]
     },
     "app_insights_location": {
       "type": "string",
@@ -30,17 +39,7 @@
     "storage_account_type": {
       "defaultValue": "Standard_LRS",
       "type": "string"
-    },
-    "app_service_sku": {
-      "type": "object",
-      "defaultValue": {
-        "name": "S1",
-        "tier": "Standard",
-        "size": "S1",
-        "family": "S",
-        "capacity": 1
-      }
-    }
+    }    
   },
   "variables": {
     "service_name": "[toLower(parameters('siteName'))]",
@@ -72,7 +71,17 @@
     "bot_env": "prod",
     "current_config": "[variables('config')[toLower(variables('bot_env'))]]",
     "site_host": "[concat(variables('app_service_name'), '.azurewebsites.net')]",
-    "bot_endpoint": "[concat('https://', variables('site_host'), '/api/messages')]"
+    "bot_endpoint": "[concat('https://', variables('site_host'), '/api/messages')]",
+    "app_service_sku": {
+      "type": "object",
+      "defaultValue": {
+        "name": "S1",
+        "tier": "Standard",
+        "size": "S1",
+        "family": "S",
+        "capacity": 1
+      }
+    }
   },
   "resources": [
     {
@@ -110,7 +119,7 @@
       "name": "[variables('app_service_name')]",
       "apiVersion": "2016-09-01",
       "location": "[parameters('service_location')]",
-      "sku": "[parameters('app_service_sku')]",
+      "sku": "[variables('app_service_sku')]",
       "properties": {
         "name": "[variables('app_service_name')]"
       }
